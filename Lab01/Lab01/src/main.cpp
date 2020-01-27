@@ -54,6 +54,7 @@ GLint hWindow=800;
 bool tangentsFlag = false;
 bool pointsFlag = false;
 bool curveFlag = true;
+bool frenetFlag = false;
 
 //curve switch index
 int curve_idx = 1;
@@ -124,12 +125,19 @@ inline Vect3d P(GLfloat t)
 	return Vect3d(rad*(float)sin(rot*M_PI*t),height*t,rad*(float)cos(rot*M_PI*t)); //spiral with radius rad, height, and rotations rot
 } // spiral along y-axis
 
-//This defines the tornado curve 
+//This defines the Tornado curve 
 inline Vect3d Tornado(GLfloat t)
 {
 	const float height = 2.f;
 	const float rot = 5.f;
-	return Vect3d(t*(float)sin(rot*M_PI*t), height*t, t*(float)cos(rot*M_PI*t)); //spiral with radius rad, height, and rotations rot
+	return Vect3d(t*(float)sin(rot*M_PI*t), height*t, t*(float)cos(rot*M_PI*t));
+}
+
+//This defines the Cardioid curve 
+inline Vect3d ButtCheek(GLfloat t) { 
+	const float rad = 0.5f;
+	const float rot = 5.f;
+	return Vect3d(-rad*(float)(sin(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), -rad*(float)(cos(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), 0);
 }
 
 //This fills the <vector> *a with data. 
@@ -151,6 +159,9 @@ void InitArray(int n)
 	} 
 	if (curve_idx == 2) {
 		CreateCurve(&v, n, Tornado);
+	}
+	if (curve_idx == 3) {
+		CreateCurve(&v, n, ButtCheek);
 	}
 	
 }
@@ -209,12 +220,34 @@ void Lab01() {
 
 //draw the tangents
 	if (tangentsFlag)
-	for (unsigned int i = 0; i < v.size() - 1; i++) {
+	for (unsigned int i = 1; i < v.size() - 1; i++) {
 		Vect3d tan;
-		tan = v[i + 1] - v[i]; //too simple - could be better from the point after AND before
+		tan = (v[i + 1] - v[i - 1]) / 2; //modified tangent for frenet frame
 		tan.Normalize(); 
-		tan *= 0.2;
+		tan *= 0.05;
 		DrawLine(v[i], v[i]+tan, red);
+
+		if (frenetFlag) { //show Frenet Frame on keyboard 'f'
+			Vect3d normal;
+			Vect3d tan2;
+			Vect3d tan1;
+			tan2 = v[i + 1] - v[i];
+			tan1 = v[i] - v[i - 1];
+			tan2.Normalize();
+			tan1.Normalize();
+			normal = (tan2 - tan1) / 2;
+			normal.Normalize();
+			normal *= 0.05;
+			DrawLine(v[i], v[i] + normal, blue);
+
+			Vect3d binormal;
+			binormal = tan.Cross(normal);
+			//binormal.Set(Vect3d::Cross(tan, normal)); //static method
+			binormal.Normalize();
+			binormal *= 0.05;
+			DrawLine(v[i], v[i] + binormal, green);
+		}
+		
 	}
 }
 
@@ -239,6 +272,8 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 	case 't': tangentsFlag = !tangentsFlag; break;
 	case 'p': pointsFlag = !pointsFlag; break;
 	case 'c': curveFlag = !curveFlag; break;
+	case 'f': frenetFlag = !frenetFlag; break;
+	
 	case 32: {
 		if (angleIncrement == 0) angleIncrement = defaultIncrement;
 		else angleIncrement = 0;
@@ -260,6 +295,7 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 		Randomize(&v);
 		break;
 	}
+	
 	case '1': {
 		curve_idx = 1;
 		InitArray(steps);
@@ -270,7 +306,10 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 		InitArray(steps);
 		break;
 	}
-
+	case '3': {
+		curve_idx = 3;
+		InitArray(steps);
+	}
 	}
 	cout << "[points]=[" << steps << "]" << endl;
 	glutPostRedisplay();
