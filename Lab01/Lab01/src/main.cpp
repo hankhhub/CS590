@@ -58,6 +58,8 @@ bool frenetFlag = false;
 
 //curve switch index
 int curve_idx = 1;
+int p_idx = 0;
+vector <Vect3d> *circle;
 
 /*********************************
 Some OpenGL-related functions DO NOT TOUCH
@@ -198,12 +200,62 @@ void CoordSyst() {
 
 }
 
+inline void Tangent(Vect3d &tan, Vect3d v1, Vect3d v2, float scale) {
+	tan = (v2 - v1) / 2; //modified tangent for frenet frame
+	tan.Normalize();
+	tan *= scale;
+}
+inline void Normal(Vect3d &normal, Vect3d p1, Vect3d p2, Vect3d p3, float scale) {
+	Vect3d tan2;
+	Vect3d tan1;	
+	tan2 = p3 - p2;
+	tan1 = p2 - p1;
+	tan2.Normalize();
+	tan1.Normalize();
+	normal = (tan2 - tan1) / 2;
+	normal.Normalize();
+	normal *= scale;
+}
+
+inline void OsculatingCircle(Vect3d Color, float scale) {
+	// 1. Get Unit Tangent
+	Vect3d tan;
+	Tangent(tan, v[p_idx + 1], v[p_idx - 1], scale);
+
+	// 2. Get Unit Normal
+	Vect3d normal;
+	Vect3d K = v[p_idx - 1];
+	Vect3d L = v[p_idx];
+	Vect3d M = v[p_idx + 1];
+	Normal(normal, K, L, M, scale);
+
+	// 3. Compute Area of Triangle
+	Vect3d KL = K - L;
+	Vect3d LM = L - M;
+	Vect3d MK = M - K;
+	float A = 0.5 * KL.Cross(LM).Length();
+
+	// 4. Compute radius from Menger Curvature
+	float c = (4 * A) / (KL.Length() * LM.Length() * MK.Length());
+	float rad = 1 / c;
+
+	// 5. Draw Circle
+	Vect3d center = v[p_idx] + rad * normal;
+	const float height = 1.f;
+	Vect3d start = center + (rad*tan);
+	float step = 1.f / 100;
+	for (unsigned int t = 1; t < 100; t++) {
+		Vect3d next = center + (rad*tan*cos(5 * M_PI*t*step)) + (rad*normal*sin(5 * M_PI*t*step));
+		DrawLine(start, next, Color);
+		start = next;
+	}
+}
+
 //this is the actual code for the lab
 void Lab01() {
 	Vect3d a,b,c;
 	Vect3d origin(0, 0, 0);
 	Vect3d red(1, 0, 0), green(0, 1, 0), blue(0, 0, 1), almostBlack(0.1f, 0.1f, 0.1f), yellow(1, 1, 0);
-
 
 	CoordSyst();
 	//draw the curve
@@ -218,37 +270,42 @@ void Lab01() {
 		DrawPoint(v[i], blue);
 	}
 
-//draw the tangents
+	//draw the tangents
 	if (tangentsFlag)
-	for (unsigned int i = 1; i < v.size() - 1; i++) {
+	for (unsigned int i = 0; i < v.size() - 1; i++) {
 		Vect3d tan;
-		tan = (v[i + 1] - v[i - 1]) / 2; //modified tangent for frenet frame
+		tan = v[i + 1] - v[i]; //too simple - could be better from the point after AND before
 		tan.Normalize(); 
-		tan *= 0.05;
-		DrawLine(v[i], v[i]+tan, red);
+		tan *= 0.2;
+		DrawLine(v[i], v[i]+tan, red);		
+	}
 
-		if (frenetFlag) { //show Frenet Frame on keyboard 'f'
+	//draw Frenet Frame
+	if (frenetFlag) {
+		for (unsigned int i = 1; i < v.size() - 1; i++) {
+			float scale = 0.05;
+			Vect3d tan;
+			Tangent(tan, v[i - 1], v[i + 1], scale);		
+			DrawLine(v[i], v[i] + tan, red);
+
 			Vect3d normal;
-			Vect3d tan2;
-			Vect3d tan1;
-			tan2 = v[i + 1] - v[i];
-			tan1 = v[i] - v[i - 1];
-			tan2.Normalize();
-			tan1.Normalize();
-			normal = (tan2 - tan1) / 2;
-			normal.Normalize();
-			normal *= 0.05;
+			Normal(normal, v[i-1], v[i], v[i+1], scale);
 			DrawLine(v[i], v[i] + normal, blue);
 
 			Vect3d binormal;
 			binormal = tan.Cross(normal);
 			//binormal.Set(Vect3d::Cross(tan, normal)); //static method
 			binormal.Normalize();
-			binormal *= 0.05;
+			binormal *= scale;
 			DrawLine(v[i], v[i] + binormal, green);
 		}
-		
 	}
+
+	//draw Osculating Circle
+	if (p_idx > 0) {
+		OsculatingCircle(red, 0.5);
+	}
+
 }
 
 //the main rendering function
@@ -309,6 +366,17 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 	case '3': {
 		curve_idx = 3;
 		InitArray(steps);
+		break;
+	}
+	case '<': {
+		if (p_idx > 0)
+			p_idx--;
+		break;
+	}
+	case '>': {
+		if(p_idx < v.size()-2)
+			p_idx++;
+		break;
 	}
 	}
 	cout << "[points]=[" << steps << "]" << endl;
