@@ -1,6 +1,6 @@
 ﻿  main.cpp
-c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(236): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(248): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(279): warning C4305: 'argument': truncation from 'double' to 'const float'
-c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(286): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(237): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(249): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(280): warning C4305: 'argument': truncation from 'double' to 'const float'
+c:\users\user\desktop\cs590\cs590\lab01\lab01\src\main.cpp(287): warning C4305: 'initializing': truncation from 'double' to 'float'
   Lab 1.vcxproj -> C:\Users\user\Desktop\CS590\CS590\Lab01\Lab01\x64\Debug\Lab 1.exe

@@ -1,0 +1,7 @@
+﻿  main.cpp
+c:\users\user\desktop\cs590\lab02\lab02\src\main.cpp(159): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\lab02\lab02\src\main.cpp(169): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\lab02\lab02\src\main.cpp(207): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\user\desktop\cs590\lab02\lab02\src\main.cpp(359): warning C4305: 'argument': truncation from 'double' to 'const float'
+c:\users\user\desktop\cs590\lab02\lab02\src\main.cpp(375): warning C4018: '<': signed/unsigned mismatch
+  Lab 2.vcxproj -> C:\Users\user\Desktop\CS590\Lab02\Lab02\x64\Debug\Lab 2.exe
