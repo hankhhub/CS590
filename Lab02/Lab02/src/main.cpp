@@ -41,6 +41,7 @@ int steps=10;     //# of subdivisions
 int head = steps / 2;
 int tail = head;
 float density = 1.0f;
+float divThreshold = 0.1f;
 bool needRedisplay=false;
 GLfloat  sign=+1; //diretcion of rotation
 const GLfloat defaultIncrement=0.7f; //speed of rotation
@@ -235,7 +236,7 @@ inline void DeCasteljau(Vect3d orig[], Vect3d color) {
 	Vect3d left[4];
 	Vect3d right[4];
 
-	if (Distance(orig[0], orig[3]) < 0.01f) {
+	if (Distance(orig[0], orig[3]) < divThreshold) { //caution: computation heavy for threshold < 0.0001
 		DrawLine(orig[0], orig[3], color );
 		return;
 	}
@@ -460,12 +461,25 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 		DeleteSeg();
 		break;
 	}
-		
+	
 	}
 	cout << "[points]=[" << steps << "]" << endl;
 	glutPostRedisplay();
 }
 
+void DirectionKeys(int key, int x, int y) {
+	switch (key)
+	{
+	case GLUT_KEY_DOWN: {
+		divThreshold += 0.001f;
+		printf("%f\n", divThreshold);
+	}
+	case GLUT_KEY_LEFT: {
+		divThreshold -= 0.001f;
+		printf("%f\n", divThreshold);
+	}
+	}
+}
 
 /*******************
 OpenGL code. Do not touch.
@@ -551,7 +565,7 @@ int main(int argc, char **argv)
   glutReshapeFunc(Reshape);
   glutKeyboardFunc(Kbd); //+ and -
   glutSpecialUpFunc(NULL); 
-  glutSpecialFunc(NULL);
+  glutSpecialFunc(DirectionKeys);
   glutMouseFunc(Mouse);
   glutMotionFunc(MouseMotion);
   InitArray(steps);
