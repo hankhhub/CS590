@@ -203,7 +203,7 @@ inline void DrawBezierCurve(Vect3d p0, Vect3d p1, Vect3d p2, Vect3d p3, int n, V
 	deltat = 1.0 / n;
 	src = p0;
 	t = 0;
-
+	
 	for (int i = 0; i < n; i++) {
 		GetBezier(dest, p0, p1, p2, p3, t+deltat);
 		DrawLine(src, dest, color);
