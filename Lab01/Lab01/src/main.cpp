@@ -136,11 +136,11 @@ inline Vect3d Tornado(GLfloat t)
 	return Vect3d(t*(float)sin(rot*M_PI*t), height*t, t*(float)cos(rot*M_PI*t));
 }
 
-//This defines the Cardioid curve 
+//This defines the Cardioid spiral
 inline Vect3d ButtCheek(GLfloat t) { 
 	const float rad = 0.5f;
 	const float rot = 5.f;
-	return Vect3d(-rad*(float)(sin(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), -rad*(float)(cos(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), 0);
+	return Vect3d(-rad*(float)(sin(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), -rad*(float)(cos(rot*M_PI*t)*(1 + cos(rot*M_PI*t))), t);
 }
 
 //This fills the <vector> *a with data. 
@@ -229,7 +229,7 @@ inline void OsculatingCircle(Vect3d Color, float scale) {
 	Vect3d L = v[p_idx];
 	Vect3d M = v[p_idx + 1];
 	Normal(normal, K, L, M, scale);
-
+	
 	// 3. Compute Area of Triangle
 	Vect3d KL = K - L;
 	Vect3d LM = L - M;
@@ -340,13 +340,15 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 	case 's': {sign = -sign; break; }
 	case '-': {
 		steps--;
-		if (steps<1) steps = 1;
-		InitArray(steps);
+		if (steps<1) steps = 1;		
+		InitArray(steps);	
+		p_idx--;
 		break;
 	}
 	case '+': {
-		steps++;
-		InitArray(steps);
+		steps++;		
+		InitArray(steps);		
+		p_idx++;
 		break;
 	}
 	case 'r': {
