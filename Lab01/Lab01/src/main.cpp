@@ -9,7 +9,6 @@
 /*       t to render tangents    */
 /*       p to render points      */
 /*       s to change rotation    */
-/*       f to show frenet frame  */
 /*********************************/
 
 #include <stdio.h>
