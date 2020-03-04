@@ -149,6 +149,7 @@ Face::Face(int p1, int p2, int p3, int p4) {
 
 typedef std::vector<unsigned int> AdjacentVertices;
 typedef std::vector<unsigned int> AdjacentFaces;
+
 class Vertex {
 public:
 	Vertex() {};
@@ -161,7 +162,6 @@ Vertex::Vertex(Vect3d vertex) {
 	this->v = vertex;
 }
 
-
 typedef std::vector<Vertex> Vertices;
 typedef std::vector<Face> Faces;
 struct Mesh
@@ -170,6 +170,7 @@ struct Mesh
 	Faces faces;
 };
 Mesh mesh;
+
 //returns random number from <-1,1>
 inline float random11() {
 	return 2.f*rand() / (float)RAND_MAX - 1.f;
@@ -260,14 +261,21 @@ void CubeFaces(Mesh *m, Face initface) {
 }
 
 void FindAdjacencies(Mesh *m) {
-	
-	for (int f = 0; f < m->faces.size(); f++) {
-		int temp[4] = m->faces[f].indices;
-		for (int p = 0; p < 4; p++) {
-			m->vertices[m->faces[f].indices[p]].adjF.push_back(f);
+	for (int i = 0;  i < m->vertices.size(); ++i) {
+		m->vertices[i].adjF.clear();
+		m->vertices[i].adjV.clear();
+	}
+
+	for (int f = 0; f < m->faces.size(); ++f) {
+		Face curFace = m->faces[f];
+		for (int p = 0; p < 4; ++p) {
+			m->vertices[curFace.indices[p]].adjF.push_back(f);
+			m->vertices[curFace.indices[(p + 1) % 4]].adjV.push_back(curFace.indices[p]);
+			m->vertices[curFace.indices[(p + 1) % 4]].adjV.push_back(curFace.indices[(p + 2) % 4]);
 		}
 	}
 }
+
 void CreateCube2(Mesh *m) {
 	float scale = 0.1;
 	float x = 0;
@@ -314,7 +322,7 @@ void Lab03(Mesh *m) {
 
 	// Create your structure here
 	CreateCube2(m);
-	
+	FindAdjacencies(m);
 }
 // Prepares all vertices for drawing
 void InitArray(int n)
