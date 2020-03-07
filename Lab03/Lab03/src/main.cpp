@@ -24,12 +24,15 @@
 #include <GL/freeglut.h>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <fstream>
 
 //in house created libraries
 #include "math/vect3d.h"    //for vector manipulation
 #include "trackball.h"
 #include "helper.h"
+#include "face.h"
+#include "vertex.h"
+#include "treebuilder.h"
 
 #pragma warning(disable : 4996)
 #pragma comment(lib, "glew32.lib")
@@ -135,7 +138,7 @@ void Quad::AddQuad(vector <GLfloat> *a, Quad *q)
 
 
 
-class Face {
+/*class Face {
 public:
 	//constructors for the mesh
 	Face() {};
@@ -149,22 +152,23 @@ Face::Face(int p1, int p2, int p3, int p4) {
 	this->indices[1] = p2;
 	this->indices[2] = p3;
 	this->indices[3] = p4;
-}
-struct Edge {
+}*/
+/*struct Edge {
 	Vect3d edgePoint;
 	int edgePointID;
-};
+};*/
 
 struct FacePoint {
 	Vect3d facePoint;
 	int facePointID;
 };
-
+typedef unordered_map<int, FacePoint> FaceMap;
+/*
 typedef unordered_set<int> AdjacentVertices;
 typedef vector<unsigned int> AdjacentFaces;
 typedef unordered_set<int> AdjFaceSet;
 typedef unordered_map<int, Edge> EdgeMap;
-typedef unordered_map<int, FacePoint> FaceMap;
+
 class Vertex {
 public:
 	Vertex() {};
@@ -179,78 +183,21 @@ public:
 };
 Vertex::Vertex(Vect3d vertex) {
 	this->v = vertex;
-}
+}*/
 
-typedef std::vector<Vertex> Vertices;
-typedef std::vector<Face> Faces;
-struct Mesh
+//typedef std::vector<Vertex> Vertices;
+//typedef std::vector<Face> Faces;
+/*struct Mesh
 {
 	Vertices vertices;
 	Faces faces;
-};
+};*/
 
 Mesh mesh;
 
-//Mesh newMesh;
 //returns random number from <-1,1>
 inline float random11() {
 	return 2.f*rand() / (float)RAND_MAX - 1.f;
-}
-
-
-void CreateCube(vector <GLfloat> *a ) 
-{
-	CTriangle top1, top2, bot1, bot2;
-	CTriangle frnt1, frnt2, back1, back2;
-	CTriangle left1, left2, right1, right2;
-	Vect3d v1, v2, v3;
-	v1.Set(-0.5f, -0.5f, -0.5f); v2.Set(0.5f, -0.5f, -0.5f); v3.Set(0.5f, 0.5f, -0.5f);
-	back1.Set(v1, v2, v3);
-	back1.AddTriangle(a, &back1);
-
-	v2.Set(-0.5f, 0.5f, -0.5f);
-	back2.Set(v1, v2, v3);
-	back2.AddTriangle(a, &back2);
-
-	v1.Set(-0.5f, -0.5f, 0.5f); v2.Set(0.5f, -0.5f, 0.5f); v3.Set(0.5f, 0.5f, 0.5f);
-	frnt1.Set(v1, v2, v3);
-	frnt1.AddTriangle(a, &frnt1);
-
-	v2.Set(-0.5f, 0.5f, 0.5f);
-	frnt2.Set(v1, v2, v3);
-	frnt2.AddTriangle(a, &frnt2);
-
-	v1.Set(-0.5f, 0.5f, 0.5f); v2.Set(-0.5f, 0.5f, -0.5f); v3.Set(-0.5f, -0.5f, -0.5f);
-	left1.Set(v1, v2, v3);
-	left1.AddTriangle(a, &left1);
-
-	v2.Set(-0.5f, -0.5f, 0.5f);
-	left2.Set(v1, v2, v3);
-	left2.AddTriangle(a, &left2);
-
-	v1.Set(0.5f, 0.5f, 0.5f); v2.Set(0.5f, 0.5f, -0.5f); v3.Set(0.5f, -0.5f, -0.5f);
-	right1.Set(v1, v2, v3);
-	right1.AddTriangle(a, &right1);
-
-	v2.Set(0.5f, -0.5f, 0.5f);
-	right2.Set(v1, v2, v3);
-	right2.AddTriangle(a, &right2);
-
-	v1.Set(-0.5f, -0.5f, -0.5f); v2.Set(0.5f, -0.5f, -0.5f); v3.Set(0.5f, -0.5f, 0.5f);
-	bot1.Set(v1, v2, v3);
-	bot1.AddTriangle(a, &bot1);
-
-	v2.Set(-0.5f, -0.5f, 0.5f);
-	bot2.Set(v1, v2, v3);
-	bot2.AddTriangle(a, &bot2);
-
-	v1.Set(-0.5f, 0.5f, -0.5f); v2.Set(0.5f, 0.5f, -0.5f); v3.Set(0.5f, 0.5f, 0.5f);
-	top1.Set(v1, v2, v3);
-	top1.AddTriangle(a, &top1);
-
-	v2.Set(-0.5f, 0.5f, 0.5f);
-	top2.Set(v1, v2, v3);
-	top2.AddTriangle(a, &top2);
 }
 
 
@@ -286,19 +233,49 @@ void MeshCleanUp(Mesh *m) {
 	}
 	//m->vertices.clear();
 }
-void SubdivideMesh(Mesh *m) {
-	//Mesh new_mesh;
-	Mesh new_mesh;
-	
-	// Compute individual face centroids
+
+int ComputeEdgePoint(Mesh *m, Mesh *new_m, Vertex *vertex, Face *face, int p, int f, int e, int vertCount) {
+	// Compute two edge points if haven't already exist
+	if (vertex->edgeMap.find(e) == vertex->edgeMap.end()) {
+		Vect3d edgePoint;
+		AdjacentFaces * edgeFaces = &m->vertices[e].adjF;
+		for (AdjacentFaces::iterator it = edgeFaces->begin(); it != edgeFaces->end(); ++it) {
+			// Check if edge share two faces
+			if (vertex->fSet.find(*it) != vertex->fSet.end() && *it != f) {
+				Vect3d p1 = vertex->v;
+				Vect3d p2 = m->vertices[e].v;
+				Vect3d p3 = face->centroid;
+				Vect3d p4 = m->faces[*it].centroid;
+				edgePoint = (p1 + p2 + p3 + p4) / 4;
+				vertex->edgeMap[e].edgePoint = edgePoint;
+				vertex->edgeMap[e].edgePointID = vertCount;
+				m->vertices[e].edgeMap[p].edgePoint = edgePoint;
+				m->vertices[e].edgeMap[p].edgePointID = vertCount;
+
+				new_m->vertices.push_back(edgePoint); //1										
+				vertCount++;
+				break;
+			}
+		}
+	}
+	return vertCount;
+}
+
+void ComputeFacePoints(Mesh *m) {
 	for (int f = 0; f < m->faces.size(); f++) {
 		Face* face = &m->faces[f];
 		Vect3d a = m->vertices[face->indices[0]].v;
 		Vect3d b = m->vertices[face->indices[1]].v;
 		Vect3d c = m->vertices[face->indices[2]].v;
 		Vect3d d = m->vertices[face->indices[3]].v;
-		face->centroid = (a + b + c + d) / 4;		
+		face->centroid = (a + b + c + d) / 4;
 	}
+}
+void SubdivideMesh(Mesh *m) {
+	//Mesh new_mesh;
+	Mesh new_mesh;
+	
+	ComputeFacePoints(m);
 
 	int newFaceCount = 0;
 	int newVertCount = 0;
@@ -333,56 +310,8 @@ void SubdivideMesh(Mesh *m) {
 				}
 			}
 			
-			// Compute two edge points if haven't already exist
-			if (vertex->edgeMap.find(edge[0]) == vertex->edgeMap.end()) {
-				Vect3d edgePoint;
-				AdjacentFaces * edgeFaces = &m->vertices[edge[0]].adjF;
-				for (AdjacentFaces::iterator f1 = edgeFaces->begin(); f1 != edgeFaces->end(); ++f1) {
-					// Check if edge share two faces
-					if (vertex->fSet.find(*f1) != vertex->fSet.end() && *f1 != f_idx) {
-						Vect3d p1 = vertex->v;
-						Vect3d p2 = m->vertices[edge[0]].v;
-						Vect3d p3 = face->centroid;
-						Vect3d p4 = m->faces[*f1].centroid;
-						edgePoint = (p1 + p2 + p3 + p4) / 4;
-						vertex->edgeMap[edge[0]].edgePoint = edgePoint;
-						vertex->edgeMap[edge[0]].edgePointID = newVertCount;
-						m->vertices[edge[0]].edgeMap[p].edgePoint = edgePoint;
-						m->vertices[edge[0]].edgeMap[p].edgePointID = newVertCount;
-
-						new_mesh.vertices.push_back(edgePoint); //1										
-						newVertCount++;
-						
-						break;
-						
-					}
-				}
-				
-			}
-			
-
-			if (vertex->edgeMap.find(edge[1]) == vertex->edgeMap.end()) {
-				Vect3d edgePoint;
-				AdjacentFaces * edgeFaces = &m->vertices[edge[1]].adjF;
-				for (AdjacentFaces::iterator f2 = edgeFaces->begin(); f2 != edgeFaces->end(); ++f2) {
-					if (vertex->fSet.find(*f2) != vertex->fSet.end() && *f2 != f_idx) {
-						Vect3d p1 = vertex->v;
-						Vect3d p2 = m->vertices[edge[1]].v;
-						Vect3d p3 = face->centroid;
-						Vect3d p4 = m->faces[*f2].centroid;
-						edgePoint = (p1 + p2 + p3 + p4) / 4;
-						vertex->edgeMap[edge[1]].edgePoint = edgePoint;
-						vertex->edgeMap[edge[1]].edgePointID = newVertCount;
-						m->vertices[edge[1]].edgeMap[p].edgePoint = edgePoint;
-						m->vertices[edge[1]].edgeMap[p].edgePointID = newVertCount;
-						new_mesh.vertices.push_back(edgePoint); //1										
-						newVertCount++;
-						
-						break;
-					}
-				}
-							
-			}					
+			newVertCount = ComputeEdgePoint(m, &new_mesh, vertex, face, p, f_idx, edge[0], newVertCount);
+			newVertCount = ComputeEdgePoint(m, &new_mesh, vertex, face, p, f_idx, edge[1], newVertCount);			
 			
 			new_mesh.faces.push_back(Face(vertex->edgeMap[edge[0]].edgePointID, faceMap[f_idx].facePointID,vertex->edgeMap[edge[1]].edgePointID , 0));
 			newFaceCount++;
@@ -395,7 +324,7 @@ void SubdivideMesh(Mesh *m) {
 		}
 		Vect3d R = edgeMidpointSum / (float) adjVCount;
 		Vect3d S = vertex->faceCentroidSum / (float) adjFCount;
-		float n = adjVCount;
+		float n = (float) adjVCount;
 		Vect3d Center = ((n - 3)*vertex->v + (2 * R) + S) / n;
 
 		new_mesh.vertices.push_back(Center);
@@ -408,11 +337,10 @@ void SubdivideMesh(Mesh *m) {
 		
 	}
 	faceMap.clear();
-	//printf("%d\n", newFaceCount);
+
 	// Replace old mesh vert/faces with new ones
 	//m->vertices.clear();
 	//m->faces.clear();
-	
 	MeshCleanUp(m);
 	m->vertices = new_mesh.vertices;
 	m->faces = new_mesh.faces;	
@@ -421,49 +349,20 @@ void SubdivideMesh(Mesh *m) {
 }
 
 
-void CatmullClark(Mesh *m, int n) {
-	//Mesh *old_mesh = m;	
+void CatmullClark(Mesh *m, int n) {	
 	for (int i = 0; i < n; i++) {
 		FindAdjacencies(m);
 		SubdivideMesh(m);	
 	}
-	
-	
 }
 
-void CubeVertices(Mesh* m, Vect3d c, float delta) {
-	float x, y, z;
-	float startx = c.v[0] - delta; float endx = c.v[0] + delta;
-	float starty = c.v[1] - delta; float endy = c.v[1] + delta;
-	float startz = c.v[2] - delta; float endz = c.v[2] + delta;
 
-	for (x = startx; x <= endx; x += 2 * delta)
-		for (y = starty; y <= endy; y += 2 * delta)
-			for (z = startz; z <= endz; z += 2 * delta)
-			{
-				m->vertices.push_back(Vect3d(x, y, z));
-			}
-}
-void CubeFaces(Mesh *m, Face initface) {
-	int p1 = initface.indices[0];
-	int p2 = initface.indices[1];
-	int p3 = initface.indices[2];
-	int p4 = initface.indices[3];
-
-	m->faces.push_back(Face(p1, p2, p3, p4)); //left
-	m->faces.push_back(Face(p1 + 6, p2 + 6, p3 + 2, p4 + 2)); //right
-	m->faces.push_back(Face(p1 + 4, p2 + 4, p3 - 2, p4 - 2)); //bottom
-	//m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 4, p4 + 4)); //top
-	m->faces.push_back(Face(p1, p2 + 1, p3 + 3, p4 + 2)); //back
-	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
-}
-
-void CreateCube2(Mesh *m) {
+void ConstructTree(Mesh *m) {
 	float scale = 0.5;
 	float x = 0;
 	float y = 0;
 	float z = 0;
-	float offset = 0.1;
+	float offset = 0.1f;
 	Vect3d center = Vect3d(x, y, z);
 
 	CubeVertices(m, center, offset);
@@ -473,29 +372,35 @@ void CreateCube2(Mesh *m) {
 	//m->f.push_back(Face(2, 3, 7, 6));
 	m->f.push_back(Face(0, 2, 6, 4));
 	m->f.push_back(Face(5, 7, 3, 1));*/
-	CubeFaces(m, Face(0, 1, 3, 2));
-	
+
+	TreeTipNegY(m, Face(0, 1, 3, 2));
 	center.v[1] += 0.8f;
 	center.v[0] -= 0.2f;
-	CubeVertices(m, center, offset-0.05);
+	CubeVertices(m, center, offset-0.05f);
 	
-	m->faces.push_back(Face(3, 7, 13, 9));
+	ConnectY(m, Face(2, 3, 9, 8));
+	/*m->faces.push_back(Face(2, 3, 9, 8));
 	m->faces.push_back(Face(7, 6, 12, 13));
 	m->faces.push_back(Face(2, 6, 12, 8));
-	m->faces.push_back(Face(2, 3, 9, 8));
+	m->faces.push_back(Face(3, 7, 13, 9));*/
 	
+	TrunkY(m, Face(8, 9, 11, 10));
+	//TreeTipY(m, Face(8, 9, 11, 10));
+	
+	center.v[1] += 0.5f;
+	center.v[0] += 0.5f;
+	CubeVertices(m, center, offset - 0.08f);
+
+	ConnectY(m, Face(10, 11, 17, 16));
+	TreeTipY(m, Face(16, 17, 19, 18));
 	//CubeFaces(m, Face(8, 9, 11, 10));
-	m->faces.push_back(Face(8, 9, 11, 10));
+	/*m->faces.push_back(Face(8, 9, 11, 10));
 	m->faces.push_back(Face(14, 15, 13, 12));
 	//m->faces.push_back(Face(12, 13, 9, 8));
 	m->faces.push_back(Face(10, 11, 15, 14));
 	m->faces.push_back(Face(8, 10, 14, 12));
-	m->faces.push_back(Face(13, 15, 11, 9));
+	m->faces.push_back(Face(13, 15, 11, 9));*/
 
-	/*center.v[1] += 0.2f;
-	center.v[0] += 0.4f;
-	CubeVertices(m, center, offset - 0.03);
-	CubeFaces(m, Face(16, 17, 19, 18));*/
 }
 
 
@@ -506,10 +411,41 @@ void InitArray(int n)
 	mesh.vertices.clear();
 
 	// Create your structure here
-	CreateCube2(&mesh);
+	ConstructTree(&mesh);
 	CatmullClark(&mesh, n);
 }
 
+void SaveOBJ(Faces f, Vertices v, char *filename) {
+
+	ofstream myfile;
+	myfile.open(filename);
+	
+	myfile << "# Generated by Bedrich Benes bbenes@purdue.edu\n";
+	myfile << "# vertices\n";
+	for (unsigned int i = 0; i < v.size(); i++) {
+		myfile << "v " << v.at(i).v.GetZ() << " " << v.at(i).v.GetY() << " " << v.at(i).v.GetX() << "\n";
+	}
+	
+	myfile << "# faces\n";
+	/*for (unsigned int i = 0; i < f.size(); i++) {
+		myfile << "f " << f[i].indices[0];
+		myfile << " " << f[i].indices[1];
+		myfile << " " << f[i].indices[2] << " " << "\n";
+
+		myfile << "f " << f[i].indices[0];
+		myfile << " " << f[i].indices[2];
+		myfile << " " << f[i].indices[3] << " " << "\n";
+	}*/
+
+	for (unsigned int i = 0; i < f.size(); i++) {
+		myfile << "f " << f[i].indices[0];
+		myfile << " " << f[i].indices[1];
+		myfile << " " << f[i].indices[2]; 
+		myfile << " " << f[i].indices[3] << " " << "\n";		
+	}
+	myfile.close();
+
+}
 void drawMesh() {
 	glBegin(GL_QUADS);
 	for (Faces::const_iterator f = mesh.faces.begin(); f != mesh.faces.end(); ++f)
@@ -560,6 +496,9 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 		steps++;
 		InitArray(steps);
 		break;
+	}
+	case 'w': {
+		SaveOBJ(mesh.faces, mesh.vertices, "mesh.obj"); break;
 	}
 
 	}

@@ -1,8 +1,5 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Lab 2.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   main.cpp
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(310): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(311): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(398): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(466): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(480): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(287): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(288): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   Lab 2.vcxproj -> C:\Users\user\Desktop\CS590\CS590\Lab03\Lab03\x64\Debug\Lab03.exe
