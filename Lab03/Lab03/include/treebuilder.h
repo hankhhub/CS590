@@ -7,7 +7,9 @@ struct Mesh
 	Faces faces;
 };
 
-void CubeVertices(Mesh* m, Vect3d c, float delta);
+enum RotationAxis { ROTX, ROTY, ROTZ, NONE };
+
+void CubeVertices(Mesh* m, Vect3d c, float delta, RotationAxis axis, int angle);
 void CubeFaces(Mesh *m, Face initface);
 
 void TreeTipZ(Mesh*m, Face curFace);

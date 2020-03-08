@@ -1,5 +1,10 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Lab 2.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   main.cpp
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(287): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(288): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Lab 2.vcxproj -> C:\Users\user\Desktop\CS590\CS590\Lab03\Lab03\x64\Debug\Lab03.exe
+c:\users\hankh\desktop\cs590\cs590\lab03\lab03\src\main.cpp(287): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\hankh\desktop\cs590\cs590\lab03\lab03\src\main.cpp(288): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  treebuilder.cpp
+c:\users\hankh\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(5): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\hankh\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(6): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\hankh\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(7): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  Lab 2.vcxproj -> C:\Users\hankh\Desktop\CS590\CS590\Lab03\Lab03\x64\Debug\Lab03.exe

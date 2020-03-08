@@ -97,7 +97,7 @@ void CTriangle::Set(Vect3d v1, Vect3d v2, Vect3d v3) {
 	this->v3 = v3;
 }
 
-void CTriangle::AddTriangle(vector <GLfloat> *a, CTriangle *tri) 
+void CTriangle::AddTriangle(vector <GLfloat> *a, CTriangle *tri)
 {
 	AddVertex(a, tri->v1);
 	AddVertex(a, tri->v2);
@@ -173,13 +173,13 @@ class Vertex {
 public:
 	Vertex() {};
 	Vertex(Vect3d vertex);
-	Vect3d v;	
-	AdjacentVertices adjV;	
+	Vect3d v;
+	AdjacentVertices adjV;
 	AdjacentFaces adjF;
 	AdjFaceSet fSet;
 	Vect3d faceCentroidSum;
 	EdgeMap edgeMap;
-	
+
 };
 Vertex::Vertex(Vect3d vertex) {
 	this->v = vertex;
@@ -202,7 +202,7 @@ inline float random11() {
 
 
 void FindAdjacencies(Mesh *m) {
-	for (int i = 0;  i < m->vertices.size(); ++i) {
+	for (int i = 0; i < m->vertices.size(); ++i) {
 		m->vertices[i].adjF.clear();
 		m->vertices[i].adjV.clear();
 		m->vertices[i].faceCentroidSum = Vect3d(0, 0, 0);
@@ -274,25 +274,25 @@ void ComputeFacePoints(Mesh *m) {
 void SubdivideMesh(Mesh *m) {
 	//Mesh new_mesh;
 	Mesh new_mesh;
-	
+
 	ComputeFacePoints(m);
 
 	int newFaceCount = 0;
 	int newVertCount = 0;
 	FaceMap faceMap;
 	for (int p = 0; p < m->vertices.size(); ++p) {
-		Vertex * vertex = &m->vertices[p];	
+		Vertex * vertex = &m->vertices[p];
 		Vertices * new_vertices = &new_mesh.vertices;
 
 		int adjFCount = vertex->adjF.size();
-		int adjVCount = vertex->adjV.size();	
+		int adjVCount = vertex->adjV.size();
 
 		for (int f = 0; f < adjFCount; ++f) {
 			int f_idx = vertex->adjF[f];
 			Face* face = &m->faces[f_idx];
 			vertex->faceCentroidSum += face->centroid;
 
-			if (faceMap.find(f_idx) == faceMap.end()) {				
+			if (faceMap.find(f_idx) == faceMap.end()) {
 				faceMap[f_idx].facePointID = newVertCount;
 				faceMap[f_idx].facePoint = face->centroid;
 				new_mesh.vertices.push_back(face->centroid);
@@ -306,25 +306,25 @@ void SubdivideMesh(Mesh *m) {
 				AdjacentVertices * adjVert = &m->vertices[face->indices[corner]].adjV;
 				if (adjVert->find(p) != adjVert->end()) {
 					edge[cnt] = face->indices[corner];
-					cnt++;					
+					cnt++;
 				}
 			}
-			
+
 			newVertCount = ComputeEdgePoint(m, &new_mesh, vertex, face, p, f_idx, edge[0], newVertCount);
-			newVertCount = ComputeEdgePoint(m, &new_mesh, vertex, face, p, f_idx, edge[1], newVertCount);			
-			
-			new_mesh.faces.push_back(Face(vertex->edgeMap[edge[0]].edgePointID, faceMap[f_idx].facePointID,vertex->edgeMap[edge[1]].edgePointID , 0));
+			newVertCount = ComputeEdgePoint(m, &new_mesh, vertex, face, p, f_idx, edge[1], newVertCount);
+
+			new_mesh.faces.push_back(Face(vertex->edgeMap[edge[0]].edgePointID, faceMap[f_idx].facePointID, vertex->edgeMap[edge[1]].edgePointID, 0));
 			newFaceCount++;
 		}
 
 		// Compute new gravity point
-		Vect3d edgeMidpointSum = Vect3d(0,0,0);
+		Vect3d edgeMidpointSum = Vect3d(0, 0, 0);
 		for (EdgeMap::iterator edge_it = vertex->edgeMap.begin(); edge_it != vertex->edgeMap.end(); ++edge_it) {
 			edgeMidpointSum += edge_it->second.edgePoint;
 		}
-		Vect3d R = edgeMidpointSum / (float) adjVCount;
-		Vect3d S = vertex->faceCentroidSum / (float) adjFCount;
-		float n = (float) adjVCount;
+		Vect3d R = edgeMidpointSum / (float)adjVCount;
+		Vect3d S = vertex->faceCentroidSum / (float)adjFCount;
+		float n = (float)adjVCount;
 		Vect3d Center = ((n - 3)*vertex->v + (2 * R) + S) / n;
 
 		new_mesh.vertices.push_back(Center);
@@ -332,9 +332,9 @@ void SubdivideMesh(Mesh *m) {
 
 		// Fill in gravity point to new faces
 		for (int i = adjFCount; i > 0; i--) {
-			new_mesh.faces[newFaceCount - i].indices[3] = newVertCount-1;
+			new_mesh.faces[newFaceCount - i].indices[3] = newVertCount - 1;
 		}
-		
+
 	}
 	faceMap.clear();
 
@@ -343,57 +343,49 @@ void SubdivideMesh(Mesh *m) {
 	//m->faces.clear();
 	MeshCleanUp(m);
 	m->vertices = new_mesh.vertices;
-	m->faces = new_mesh.faces;	
+	m->faces = new_mesh.faces;
 	assert(newVertCount == new_mesh.vertices.size());
 	assert(newFaceCount == new_mesh.faces.size());
 }
 
 
-void CatmullClark(Mesh *m, int n) {	
+void CatmullClark(Mesh *m, int n) {
 	for (int i = 0; i < n; i++) {
 		FindAdjacencies(m);
-		SubdivideMesh(m);	
+		SubdivideMesh(m);
 	}
 }
 
 
 void ConstructTree(Mesh *m) {
-	float scale = 0.5;
-	float x = 0;
-	float y = 0;
-	float z = 0;
-	float offset = 0.1f;
-	Vect3d center = Vect3d(x, y, z);
 
-	CubeVertices(m, center, offset);
-	/*m->f.push_back(Face(0, 1, 3, 2));
-	m->f.push_back(Face(6, 7, 5, 4));
-	m->f.push_back(Face(4, 5, 1, 0)); 
-	//m->f.push_back(Face(2, 3, 7, 6));
-	m->f.push_back(Face(0, 2, 6, 4));
-	m->f.push_back(Face(5, 7, 3, 1));*/
+	float scale = 0.1f;
+	Vect3d center = Vect3d(0, 0, 0);
 
+	CubeVertices(m, center, scale, NONE, 0);
 	TreeTipNegY(m, Face(0, 1, 3, 2));
-	center.v[1] += 0.8f;
-	center.v[0] -= 0.2f;
-	CubeVertices(m, center, offset-0.05f);
-	
+
+	center.v[1] += scale * 5.0f;
+	CubeVertices(m, center, scale - 0.01f, ROTY, 20);
+
 	ConnectY(m, Face(2, 3, 9, 8));
-	/*m->faces.push_back(Face(2, 3, 9, 8));
-	m->faces.push_back(Face(7, 6, 12, 13));
-	m->faces.push_back(Face(2, 6, 12, 8));
-	m->faces.push_back(Face(3, 7, 13, 9));*/
-	
 	TrunkY(m, Face(8, 9, 11, 10));
-	//TreeTipY(m, Face(8, 9, 11, 10));
-	
-	center.v[1] += 0.5f;
+
+	//center.v[0] += 0.5f;
+	center.v[1] += scale * 5.0f;
+	CubeVertices(m, center, scale - 0.05f, ROTZ, 10);
+
+	ConnectY(m, Face(10, 11, 17, 16));
+	TrunkY(m, Face(16, 17, 19, 18));
+
+
+	/*center.v[1] += 0.5f;
 	center.v[0] += 0.5f;
-	CubeVertices(m, center, offset - 0.08f);
+	CubeVertices(m, center, offset - 0.08f, ROTY, 10);
 
 	ConnectY(m, Face(10, 11, 17, 16));
 	TreeTipY(m, Face(16, 17, 19, 18));
-	//CubeFaces(m, Face(8, 9, 11, 10));
+	//CubeFaces(m, Face(8, 9, 11, 10));*/
 	/*m->faces.push_back(Face(8, 9, 11, 10));
 	m->faces.push_back(Face(14, 15, 13, 12));
 	//m->faces.push_back(Face(12, 13, 9, 8));
@@ -419,13 +411,13 @@ void SaveOBJ(Faces f, Vertices v, char *filename) {
 
 	ofstream myfile;
 	myfile.open(filename);
-	
+
 	myfile << "# Generated by Bedrich Benes bbenes@purdue.edu\n";
 	myfile << "# vertices\n";
 	for (unsigned int i = 0; i < v.size(); i++) {
 		myfile << "v " << v.at(i).v.GetZ() << " " << v.at(i).v.GetY() << " " << v.at(i).v.GetX() << "\n";
 	}
-	
+
 	myfile << "# faces\n";
 	/*for (unsigned int i = 0; i < f.size(); i++) {
 		myfile << "f " << f[i].indices[0];
@@ -440,8 +432,8 @@ void SaveOBJ(Faces f, Vertices v, char *filename) {
 	for (unsigned int i = 0; i < f.size(); i++) {
 		myfile << "f " << f[i].indices[0];
 		myfile << " " << f[i].indices[1];
-		myfile << " " << f[i].indices[2]; 
-		myfile << " " << f[i].indices[3] << " " << "\n";		
+		myfile << " " << f[i].indices[2];
+		myfile << " " << f[i].indices[3] << " " << "\n";
 	}
 	myfile.close();
 
@@ -583,8 +575,8 @@ int main(int argc, char **argv)
 	glutInitWindowPosition(500, 100);
 	glutCreateWindow("Catmull Clark Subdivision");
 	GLenum err = glewInit();
-	 if (GLEW_OK != err){
-	 fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	if (GLEW_OK != err) {
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
 	glutDisplayFunc(Display);
 	glutIdleFunc(Idle);
