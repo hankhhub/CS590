@@ -29,5 +29,8 @@ void ConnectY(Mesh*m, Face curFace);
 void TrunkZ(Mesh*m, Face curFace);
 
 void BranchTop(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
-void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
-void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
+void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments, float *dim);
+void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments, float *dim);
+
+void LeftBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect);
+void RightBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect);

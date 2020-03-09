@@ -41,6 +41,11 @@
 
 using namespace std;
 
+#define MAXLEN 20
+#define BINARY 2
+#define TERNARY 3
+#define QUATERNARY 4
+
 //some trackball variables -> used in mouse feedback
 TrackBallC trackball;
 bool mouseLeft, mouseMid, mouseRight;
@@ -48,7 +53,7 @@ bool mouseLeft, mouseMid, mouseRight;
 GLuint points = 0;  //number of points to display the object
 int steps = 0;     //# of subdivisions
 bool needRedisplay = false;
-GLfloat  sign = +1; //diretcion of rotation
+GLfloat  sign = +1; //direction of rotation
 const GLfloat defaultIncrement = 0.7f; //speed of rotation
 GLfloat  angleIncrement = defaultIncrement;
 
@@ -63,63 +68,23 @@ bool pointsFlag = false;
 bool curveFlag = true;
 
 RotationAxis axis = NONE;
+float scale = 0.1f;
 int angle = 0;
-//float scale = 0.1f;
+float length = 2.0f;
+float width = scale /(float) 2;
+
+int branch_type = BINARY;
+
 
 /**********************
 LAB related MODIFY
 ***********************/
-
-// 
-inline void AddVertex(vector <GLfloat> *a, const GLfloat *A)
-{
-	a->push_back(A[0]); a->push_back(A[1]); a->push_back(A[2]);
-}
-
-class Quad {
-public:
-	Quad() {};
-	Quad(Vect3d v1, Vect3d v2, Vect3d v3, Vect3d v4);
-	void AddQuad(vector<GLfloat> *a, Quad *q);
-	void Set(Vect3d v1, Vect3d v2, Vect3d v3, Vect3d v4);
-
-private:
-	Vect3d v1, v2, v3, v4;
-};
-
-Quad::Quad(Vect3d v1, Vect3d v2, Vect3d v3, Vect3d v4) {
-	this->v1 = v1;
-	this->v2 = v2;
-	this->v3 = v3;
-	this->v4 = v4;
-}
-void Quad::Set(Vect3d v1, Vect3d v2, Vect3d v3, Vect3d v4) {
-	this->v1 = v1;
-	this->v2 = v2;
-	this->v3 = v3;
-	this->v4 = v4;
-}
-
-void Quad::AddQuad(vector <GLfloat> *a, Quad *q)
-{
-	AddVertex(a, q->v1);
-	AddVertex(a, q->v2);
-	AddVertex(a, q->v3);
-	AddVertex(a, q->v4);
-}
-
 struct FacePoint {
 	Vect3d facePoint;
 	int facePointID;
 };
 typedef unordered_map<int, FacePoint> FaceMap;
 Mesh mesh;
-
-//returns random number from <-1,1>
-inline float random11() {
-	return 2.f*rand() / (float)RAND_MAX - 1.f;
-}
-
 
 void FindAdjacencies(Mesh *m) {
 	for (int i = 0; i < m->vertices.size(); ++i) {
@@ -272,123 +237,48 @@ void CatmullClark(Mesh *m, int n) {
 	}
 }
 
-void LeftBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect) {
-	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
-	center->v[1] += scale * 4.0f;
-	CubeVertices(m, *center, scale - 0.02f, axis, angle);
-	ConnectY(m, Face(connect - 6, connect - 5, c - 2, d - 2));
-	TrunkYLeft(m, Face(a, b, c, d));
-}
-
-void RightBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect) {
-	center->v[1] += scale * 5.0f;
-	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
-	CubeVertices(m, *center, scale - 0.02f, axis, angle);
-	ConnectY(m, Face(connect - 6, connect - 5, b, a));
-	TrunkYRight(m, Face(a, b, c, d));
-
-}
-
 void ConstructTree(Mesh *m) {
-	int vertCount = 0;
-	float scale = 0.1f;
 	int connect = 0;
+	float dimension[2] = { length, width };
 	Vect3d center = Vect3d(0, 0, 0);
 
 	CubeVertices(m, center, scale, NONE, 0);
 	TreeTipNegY(m, Face(0, 1, 3, 2));
-	vertCount += 8;
 	
 	center.v[1] += scale * 5.0f;
 	CubeVertices(m, center, scale - 0.01f, ROTY, 20);
 	ConnectY(m, Face(2, 3, 9, 8));
 	TrunkY(m, Face(8, 9, 11, 10));
-	vertCount += 8;
-
-	connect = m->vertices.size();
-
-	/*center.v[1] += scale * 4.0f;
-	CubeVertices(m, center, scale - 0.02f, ROTY, 20);
-	ConnectY(m, Face(10, 11, 17, 16));
-	TrunkYLeft(m, Face(16, 17, 19, 18));
-	vertCount += 8; // index 16-23*/
-	LeftBranchConnect(m, &center, scale, ROTY, 20, connect);
-
-	connect = m->vertices.size();
-	/*Branch 1 Start */
-	BranchLeft(m, center, scale, axis, angle, 2);
-	/*Vect3d branch1 = center;
-	branch1.v[0] -= scale * 5.0f;
-	CubeVertices(m, branch1, scale - 0.05f, ROTX, 10);
-	ConnectLeft(m, Face(16, 17, 29, 28));
-	TrunkX(m, Face(24, 25, 27, 26));
-	vertCount += 8; // index 24-31
-
-	branch1.v[0] -= scale * 5.0f;
-	branch1.v[1] += scale * 2.0f;
-	CubeVertices(m, branch1, scale - 0.07f, ROTX, 20);
-	ConnectLeft(m, Face(24, 25, 37, 36));
-	TrunkX(m, Face(32, 33, 35, 34));
-	vertCount += 8;
-
-	branch1.v[0] -= scale * 2.0f;
-	branch1.v[1] += scale * 1.0f;
-	CubeVertices(m, branch1, scale - 0.095f, ROTY, 10);
-	ConnectLeft(m, Face(32, 33, 45, 44));
-	TreeTipNegX(m, Face(40, 41, 43, 42));
-	vertCount += 8; // index 40-47*/
-	/*Branch1 End*/
-	RightBranchConnect(m, &center, scale, ROTZ, 10, connect);
-	/*center.v[1] += scale * 5.0f;
-	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
-	CubeVertices(m, center, scale - 0.02f, ROTZ, 10);
-	ConnectY(m, Face(connect-6, connect-5, b, a));
-	TrunkYRight(m, Face(a, b, c, d));
-	vertCount += 8; //48-55*/
-
-	connect = m->vertices.size();
-	/*Branch 2 Start */
-	BranchRight(m, center, scale, axis, angle, 3);
-	/*Vect3d branch2 = center;
-	branch2.v[0] += scale * 2.0f;
-	CubeVertices(m, branch2, scale - 0.05f, ROTZ, 10);
-	ConnectRight(m, Face(52, 53, 57, 56));
-	TrunkX(m, Face(56, 57, 59, 58));
-	vertCount += 8; 
-
-	branch2.v[0] += scale * 2.0f;
-	CubeVertices(m, branch2, scale - 0.08f, ROTX, 0);
-	ConnectRight(m, Face(60, 61, 65, 64));
-	TrunkX(m, Face(64, 65, 67, 66));
-	vertCount += 8;
-
-	branch2.v[0] += scale * 2.0f;
-	CubeVertices(m, branch2, scale - 0.09f, ROTY, 10);
-	ConnectRight(m, Face(68, 69, 73, 72));
-	TreeTipX(m, Face(72, 73, 75, 74));
-	vertCount += 8;*/
-	/*Branch 2 End*/
-
 	
+	connect = m->vertices.size();
+
+	LeftBranchConnect(m, &center, scale, ROTY, 20, connect);
+	connect = m->vertices.size();
+	BranchLeft(m, center, scale, axis, angle, 3, dimension);
+
+	RightBranchConnect(m, &center, scale, ROTZ, 10, connect);
+	connect = m->vertices.size();
+	BranchRight(m, center, scale, axis, angle, 3, dimension);
+
+	if (branch_type == TERNARY || branch_type == QUATERNARY) {
+		LeftBranchConnect(m, &center, scale, ROTY, 20, connect);
+		connect = m->vertices.size();
+		BranchLeft(m, center, scale, axis, angle, 3, dimension);
+	}
+	
+	if (branch_type == QUATERNARY) {
+		RightBranchConnect(m, &center, scale, ROTY, 10, connect);
+		connect = m->vertices.size();
+		BranchRight(m, center, scale, axis, angle, 3, dimension);
+	}
+
 	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
 	center.v[1] += scale * 4.0f;
 	CubeVertices(m, center, scale - 0.05f, ROTZ, 0);
 	ConnectY(m, Face(connect - 6, connect - 5, b, a));
 	TrunkY(m, Face(a, b, c, d));
-	vertCount += 8;
-
+	
 	BranchTop(m, center, scale, NONE, 0, 1);
-	/*center.v[1] += scale * 2.0f;
-	CubeVertices(m, center, scale - 0.065f, NONE, 0);
-	ConnectY(m, Face(82, 83, 89, 88));
-	TrunkY(m, Face(88, 89, 91, 90));
-	vertCount += 8;
-
-	center.v[1] += scale * 3.0f;
-	CubeVertices(m, center, scale - 0.085f, NONE, 0);
-	ConnectY(m, Face(90, 91, 97, 96));
-	TreeTipY(m, Face(96, 97, 99, 98));
-	vertCount += 8;*/
 }
 
 
@@ -458,7 +348,6 @@ void RenderObjects()
 	trackball.Set3DViewCamera();
 	//call the student's code from here
 	CoordSyst();
-	//glDrawArrays(GL_TRIANGLES, 0, 3 * points);
 	drawMesh();
 }
 
@@ -516,9 +405,21 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 			angle -= 5;
 			InitArray(steps);
 		}
+		break;
 	}
 	case 'w': {
 		SaveOBJ(mesh.faces, mesh.vertices, "mesh_tri.obj", true); break;
+	}
+
+	case 'b': {
+		if (branch_type < 4) {
+			branch_type += 1;
+		}
+		else {
+			branch_type = BINARY;
+		}
+		InitArray(steps);		
+		break;
 	}
 
 	}
@@ -526,6 +427,45 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 	glutPostRedisplay();
 }
 
+void DirectionKeys(int key, int x, int y) {
+	switch (key)
+	{
+	case GLUT_KEY_UP: {
+		if (width > scale/10) {
+			width -= 0.01f;
+			InitArray(steps);	
+		}
+		break;
+	}
+	case GLUT_KEY_DOWN: {		
+		if (width < scale) {
+			width += scale / 10;
+		}
+		if(width >= scale){
+			width -= scale / 10;
+		}
+		InitArray(steps);
+		break;		
+	}
+	case GLUT_KEY_LEFT: {
+		if (length > 1.0f) {
+			length -= 1.0f;
+			InitArray(steps);
+			
+		}
+		break;
+	}
+	case GLUT_KEY_RIGHT: {
+		if (length < MAXLEN) {
+			length += 1.0;
+			InitArray(steps);
+		}		
+		break;
+	}
+	}
+	cout << "[width]=[" << width << "]" << endl;
+	cout << "[length]=[" << length << "]" << endl;
+}
 
 /*******************
 OpenGL code. Do not touch.
@@ -612,6 +552,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(Kbd); //+ and -
 	glutSpecialUpFunc(NULL);
 	glutSpecialFunc(NULL);
+	glutSpecialFunc(DirectionKeys);
 	glutMouseFunc(Mouse);
 	glutMotionFunc(MouseMotion);
 	InitArray(steps);

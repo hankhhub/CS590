@@ -1,11 +1,21 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Lab 2.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   main.cpp
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(205): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(206): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(276): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(285): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(308): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(317): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(349): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(373): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(170): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(171): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(253): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(256): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(260): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(265): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(271): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\src\main.cpp(275): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  treebuilder.cpp
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(5): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(6): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(7): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(219): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(240): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(258): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(274): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\user\desktop\cs590\cs590\lab03\lab03\treebuilder.cpp(283): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
   Lab 2.vcxproj -> C:\Users\user\Desktop\CS590\CS590\Lab03\Lab03\x64\Debug\Lab03.exe

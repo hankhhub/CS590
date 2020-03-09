@@ -211,36 +211,44 @@ void TrunkZ(Mesh*m, Face curFace) {
 }
 
 
-void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments) {
+void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments, float * dim) {
 	Vect3d branch = center;
+	float len = dim[0];
+	float width = dim[1];
+	float steps = width / segments;
 	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
 	for (int i = 0; i < segments; i++) {
-		branch.v[0] -= scale * 5.0f;
-		CubeVertices(m, branch, scale - 0.05f, axis, angle);
+		branch.v[0] -= scale * len;
+		CubeVertices(m, branch, scale - width, axis, angle);
 		ConnectLeft(m, Face(a - 8, b - 8, c + 2, d + 2));
 		TrunkX(m, Face(a, b, c, d));
 		a += 8; b += 8; c += 8; d += 8;
+		width += steps;
 	}
 
-	branch.v[0] -= scale * 2.0f;
-	CubeVertices(m, branch, scale - 0.095f, axis, angle);
+	branch.v[0] -= scale * len;
+	CubeVertices(m, branch, scale - width, axis, angle);
 	ConnectLeft(m, Face(a - 8, b - 8, c + 2, d + 2));
 	TreeTipNegX(m, Face(a, b, c, d));
 }
 
-void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments) {
+void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments, float *dim) {
 	Vect3d branch = center;
+	float len = dim[0];
+	float width = dim[1];
+	float steps = width / segments;
 	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
 	for (int i = 0; i < segments; i++) {
-		branch.v[0] += scale * 5.0f;
-		CubeVertices(m, branch, scale - 0.05f, axis, angle);
+		branch.v[0] += scale * len;
+		CubeVertices(m, branch, scale - width, axis, angle);
 		ConnectRight(m, Face(a - 4, b - 4, c - 2, d - 2));
 		TrunkX(m, Face(a, b, c, d));
 		a += 8; b += 8; c += 8; d += 8;
+		width += steps;
 	}
 
 	branch.v[0] += scale * 2.0f;
-	CubeVertices(m, branch, scale - 0.09f, axis, angle);
+	CubeVertices(m, branch, scale - width, axis, angle);
 	ConnectRight(m, Face(a - 4, b - 4, c - 2, d - 2));
 	TreeTipX(m, Face(a, b, c, d));
 }
@@ -260,4 +268,20 @@ void BranchTop(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle
 	CubeVertices(m, branch, scale - 0.09f, axis, angle);
 	ConnectY(m, Face(a - 6, b - 6, c - 2, d - 2));
 	TreeTipY(m, Face(a, b, c, d));
+}
+
+void LeftBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect) {
+	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
+	center->v[1] += scale * 4.0f;
+	CubeVertices(m, *center, scale - 0.02f, axis, angle);
+	ConnectY(m, Face(connect - 6, connect - 5, c - 2, d - 2));
+	TrunkYLeft(m, Face(a, b, c, d));
+}
+
+void RightBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect) {
+	center->v[1] += scale * 5.0f;
+	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
+	CubeVertices(m, *center, scale - 0.02f, axis, angle);
+	ConnectY(m, Face(connect - 6, connect - 5, b, a));
+	TrunkYRight(m, Face(a, b, c, d));
 }
