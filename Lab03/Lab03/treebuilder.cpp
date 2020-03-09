@@ -71,8 +71,8 @@ void TreeTipX(Mesh*m, Face curFace) {
 	int p3 = curFace.indices[2];
 	int p4 = curFace.indices[3];
 
-	m->faces.push_back(Face(p1 + 6, p2 + 6, p3 + 2, p4 + 2)); //right
-	m->faces.push_back(Face(p1 + 4, p2 + 4, p3 - 2, p4 - 2)); //bottom
+	m->faces.push_back(Face(p1 + 4, p2 + 4, p3 + 4, p4 + 4)); //right
+	m->faces.push_back(Face(p1 , p2 , p3 +2, p4 +2)); //bottom
 	m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 4, p4 + 4)); //top
 	m->faces.push_back(Face(p1, p2 + 1, p3 + 3, p4 + 2)); //back
 	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
@@ -117,16 +117,28 @@ void TreeTipNegY(Mesh*m, Face curFace) {
 	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
 }
 
-void ConnectX(Mesh*m, Face curFace) {
+void ConnectLeft(Mesh*m, Face curFace) {
 	int p1 = curFace.indices[0];
 	int p2 = curFace.indices[1];
 	int p3 = curFace.indices[2];
 	int p4 = curFace.indices[3];
 
-	m->faces.push_back(Face(p1 + 4, p2 + 4, p3 - 2, p4 - 2));
-	m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 4, p4 + 4));
-	m->faces.push_back(Face(p1, p2 + 1, p3 + 3, p4 + 2));
-	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1));
+	m->faces.push_back(Face(p1, p2, p3, p4)); // connect bottom
+	m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 2, p4 + 2)); // connect top
+	m->faces.push_back(Face(p1, p2 + 1, p3 + 1, p4 )); //connect back 
+	m->faces.push_back(Face(p1 + 3, p2 , p3, p4 + 3)); //connect front
+}
+
+void ConnectRight(Mesh *m, Face curFace) {
+	int p1 = curFace.indices[0];
+	int p2 = curFace.indices[1];
+	int p3 = curFace.indices[2];
+	int p4 = curFace.indices[3];
+
+	m->faces.push_back(Face(p1, p2, p3, p4)); // connect bottom
+	m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 2, p4 + 2)); // connect top
+	m->faces.push_back(Face(p1, p2 + 1, p3 + 1, p4)); //connect back 
+	m->faces.push_back(Face(p1 + 3, p2, p3, p4 + 3)); //connect front
 }
 
 void TrunkX(Mesh*m, Face curFace) {
@@ -165,6 +177,27 @@ void TrunkY(Mesh*m, Face curFace) {
 	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
 
 }
+void TrunkYLeft(Mesh*m, Face curFace) {
+	int p1 = curFace.indices[0];
+	int p2 = curFace.indices[1];
+	int p3 = curFace.indices[2];
+	int p4 = curFace.indices[3];
+
+	m->faces.push_back(Face(p1 + 6, p2 + 6, p3 + 2, p4 + 2)); //right
+	m->faces.push_back(Face(p1, p2 + 1, p3 + 3, p4 + 2)); //back
+	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
+}
+
+void TrunkYRight(Mesh*m, Face curFace) {
+	int p1 = curFace.indices[0];
+	int p2 = curFace.indices[1];
+	int p3 = curFace.indices[2];
+	int p4 = curFace.indices[3];
+
+	m->faces.push_back(Face(p1, p2, p3, p4)); //left
+	m->faces.push_back(Face(p1, p2 + 1, p3 + 3, p4 + 2)); //back
+	m->faces.push_back(Face(p1 + 5, p2 + 6, p3, p4 - 1)); //front
+}
 void TrunkZ(Mesh*m, Face curFace) {
 	int p1 = curFace.indices[0];
 	int p2 = curFace.indices[1];
@@ -175,4 +208,56 @@ void TrunkZ(Mesh*m, Face curFace) {
 	m->faces.push_back(Face(p1 + 6, p2 + 6, p3 + 2, p4 + 2));
 	m->faces.push_back(Face(p1 + 4, p2 + 4, p3 - 2, p4 - 2));
 	m->faces.push_back(Face(p1 + 2, p2 + 2, p3 + 4, p4 + 4));
+}
+
+
+void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments) {
+	Vect3d branch = center;
+	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
+	for (int i = 0; i < segments; i++) {
+		branch.v[0] -= scale * 5.0f;
+		CubeVertices(m, branch, scale - 0.05f, axis, angle);
+		ConnectLeft(m, Face(a - 8, b - 8, c + 2, d + 2));
+		TrunkX(m, Face(a, b, c, d));
+		a += 8; b += 8; c += 8; d += 8;
+	}
+
+	branch.v[0] -= scale * 2.0f;
+	CubeVertices(m, branch, scale - 0.095f, axis, angle);
+	ConnectLeft(m, Face(a - 8, b - 8, c + 2, d + 2));
+	TreeTipNegX(m, Face(a, b, c, d));
+}
+
+void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments) {
+	Vect3d branch = center;
+	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
+	for (int i = 0; i < segments; i++) {
+		branch.v[0] += scale * 5.0f;
+		CubeVertices(m, branch, scale - 0.05f, axis, angle);
+		ConnectRight(m, Face(a - 4, b - 4, c - 2, d - 2));
+		TrunkX(m, Face(a, b, c, d));
+		a += 8; b += 8; c += 8; d += 8;
+	}
+
+	branch.v[0] += scale * 2.0f;
+	CubeVertices(m, branch, scale - 0.09f, axis, angle);
+	ConnectRight(m, Face(a - 4, b - 4, c - 2, d - 2));
+	TreeTipX(m, Face(a, b, c, d));
+}
+
+void BranchTop(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments) {
+	Vect3d branch = center;
+	int a = m->vertices.size(); int b = a + 1; int c = a + 3; int d = a + 2;
+	for (int i = 0; i < segments; i++) {
+		branch.v[1] += scale * 2.0f;
+		CubeVertices(m, branch, scale - 0.065f, axis, angle);
+		ConnectY(m, Face(a - 6, b - 6, c - 2, d - 2));
+		TrunkY(m, Face(a, b, c, d));
+		a += 8; b += 8; c += 8; d += 8;
+	}
+
+	branch.v[1] += scale * 3.0f;
+	CubeVertices(m, branch, scale - 0.09f, axis, angle);
+	ConnectY(m, Face(a - 6, b - 6, c - 2, d - 2));
+	TreeTipY(m, Face(a, b, c, d));
 }

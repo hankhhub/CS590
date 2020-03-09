@@ -20,6 +20,14 @@ void TreeTipY(Mesh*m, Face curFace);
 void TreeTipNegY(Mesh*m, Face curFace);
 
 void TrunkX(Mesh*m, Face curFace);
+void ConnectLeft(Mesh*m, Face curFace);
+void ConnectRight(Mesh *m, Face curFace);
 void TrunkY(Mesh*m, Face curFace);
+void TrunkYLeft(Mesh*m, Face curFace);
+void TrunkYRight(Mesh*m, Face curFace);
 void ConnectY(Mesh*m, Face curFace);
 void TrunkZ(Mesh*m, Face curFace);
+
+void BranchTop(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
+void BranchRight(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
+void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int segments);
