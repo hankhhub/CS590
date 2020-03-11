@@ -72,6 +72,7 @@ float scale = 0.1f;
 int angle = 0;
 float length = 2.0f;
 float width = scale /(float) 2;
+int n = 1;
 
 int branch_type = BINARY;
 
@@ -239,20 +240,23 @@ void CatmullClark(Mesh *m, int n) {
 
 void ConstructTree(Mesh *m) {
 	int connect = 0;
-	float dimension[2] = { length, width };
+	
 	Vect3d center = Vect3d(0, 0, 0);
-
 	CubeVertices(m, center, scale, NONE, 0);
 	TreeTipNegY(m, Face(0, 1, 3, 2));
 	
-	center.v[1] += scale * 5.0f;
+	center.v[1] += scale * 10.0f;
 	CubeVertices(m, center, scale - 0.01f, ROTY, 20);
 	ConnectY(m, Face(2, 3, 9, 8));
-	TrunkY(m, Face(8, 9, 11, 10));
+	//TrunkY(m, Face(8, 9, 11, 10));
+	TrunkBinary(m, Face(8, 9, 11, 10));
 	
 	connect = m->vertices.size();
 
-	LeftBranchConnect(m, &center, scale, ROTY, 20, connect);
+	RecursiveBranch(m, &center, scale, axis, angle, connect, length,width, n, width/n);
+
+			/* Hard Coded Tree */	
+	/*LeftBranchConnect(m, &center, scale, ROTY, 20, connect);
 	connect = m->vertices.size();
 	BranchLeft(m, center, scale, axis, angle, 3, dimension);
 
@@ -278,7 +282,7 @@ void ConstructTree(Mesh *m) {
 	ConnectY(m, Face(connect - 6, connect - 5, b, a));
 	TrunkY(m, Face(a, b, c, d));
 	
-	BranchTop(m, center, scale, NONE, 0, 1);
+	BranchTop(m, center, scale, NONE, 0, 1);*/
 }
 
 
@@ -403,6 +407,21 @@ void Kbd(unsigned char a, int x, int y)//keyboard callback
 	case '<': {
 		if (angle > -180) {
 			angle -= 5;
+			InitArray(steps);
+		}
+		break;
+	}
+
+	case '[': {
+		if (n > 1) {
+			n -= 1;
+			InitArray(steps);
+		}
+		break;
+	}
+	case ']': {
+		if (n < 10) {
+			n += 1;
 			InitArray(steps);
 		}
 		break;

@@ -5,7 +5,8 @@ Keyboard Interactions
 'z' to rotate branch around z-axis
 '>' to increase rotation angle
 '<' to increase rotation angle
-'b' to change type of branching (bin, tern, quat(max))
+']' to increase recursive branches
+'[' to decrease recursive branches
 'w' to save structure to .obj
 up arrow - increase branch width
 down arrow - decrease branch width

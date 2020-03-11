@@ -34,3 +34,11 @@ void BranchLeft(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angl
 
 void LeftBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect);
 void RightBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect);
+
+void TrunkBinary(Mesh*m, Face curFace);
+void BinaryBranchConnect(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect, float *dim);
+void RecursiveBranch(Mesh *m, Vect3d *center, float scale, RotationAxis axis, int angle, int connect, float len,float width, int n, float steps);
+
+void LeftToBot(Mesh*m, Face curFace);
+void RightToBot(Mesh*m, Face curFace);
+void BranchTip(Mesh *m, Vect3d center, float scale, RotationAxis axis, int angle, int connect);
