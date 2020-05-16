@@ -1,14 +1,6 @@
-Keyboard Interactions
+# Catmull Clark Subdivision Surfaces
 
-'x' to rotate branch around x-axis
-'y' to rotate branch around y-axis
-'z' to rotate branch around z-axis
-'>' to increase rotation angle
-'<' to increase rotation angle
-']' to increase recursive branches
-'[' to decrease recursive branches
-'w' to save structure to .obj
-up arrow - increase branch width
-down arrow - decrease branch width
-right arrow - increase branch length
-left arrow - decrease branch length
+- surface subdivision implemented by Catmull-Clark subdivison algorithm https://en.wikipedia.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
+- procedural set of connected boxes in a form of binary, ternary branching
+- level of subdivison adjustable by '+' or '-'
+- model can be exported as .obj 
